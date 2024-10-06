@@ -1,7 +1,7 @@
 # Easy to Print Struct and Enum in C++!
 
 ## 1. 通过宏注册的形式，实现枚举支持以流的形式打印，且输出为字符串，而非整数形式。 
-以如下形式注册枚举：
+以如下形式注册枚举，其中REGISTER_ENUM需要编译期可见，用于创建operator<<重载的声明；REGISTER_ENUM_STREAM中实现operator<<重载（即，分文件编写时，把REGISTER_ENUM放到头文件中，把REGISTER_ENUM_STREAM放在cpp中）：
 ``` c++
 enum class Color
 {
@@ -13,6 +13,7 @@ REGISTER_ENUM(Color,
               REGISTER_MEMBER(Color::RED),
               REGISTER_MEMBER(Color::GREEN),
               REGISTER_MEMBER(Color::BLUE));
+REGISTER_ENUM_STREAM(Color);
 ```
 然后使用流正常输出：
 ``` c++

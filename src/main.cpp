@@ -11,6 +11,7 @@ REGISTER_ENUM(Color,
               REGISTER_MEMBER(Color::RED),
               REGISTER_MEMBER(Color::GREEN),
               REGISTER_MEMBER(Color::BLUE));
+REGISTER_ENUM_STREAM(Color);
 
 
 struct School
