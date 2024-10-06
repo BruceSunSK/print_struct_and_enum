@@ -48,18 +48,16 @@ struct Person
 
 int main(int argc, char const * argv[])
 {
-    Color c = Color::GREEN;
-    std::cout << "color c is: " << c << std::endl;
+    // Color c = Color::GREEN;
+    // std::cout << "color c is: " << c << std::endl;
 
     Person p = { "Bob", 18, 1.8, {"BIT", 42}, {Color::RED, "basketball"} };
-    std::cin >> p.favorite.hobby;
-
     PRINT_STRUCT(std::cout, p);
 
-    std::stringstream ss;
-    PRINT_STRUCT(ss, p);
-    ss << "here is stringstream!" << std::endl;
-    std::cout << ss.str();
+    // std::stringstream ss;
+    // PRINT_STRUCT(ss, p);
+    // ss << "here is stringstream!" << std::endl;
+    // std::cout << ss.str();
 
     return 0;
 }

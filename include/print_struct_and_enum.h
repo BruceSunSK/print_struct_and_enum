@@ -22,44 +22,45 @@ struct has_member_print<T, decltype(void(std::declval<T>().__print(std::cout, ""
 
 /// @brief 注册结构体时需要调用，依次传入注册后的对象名。需要编译期可见，一般放在头文件中
 /// @param ... 结构体中所有的对象
-#define REGISTER_STRUCT(...)                                                                          \
-    void __print(std::ostream & out, const std::string & name, const std::string & indent = "") const \
-    {                                                                                                 \
-        out << indent << name << ":\n";                                                               \
-        __print_members(out, indent + "  ", __VA_ARGS__);                                             \
-    }                                                                                                 \
-                                                                                                      \
-    template<typename Last>                                                                           \
-    typename std::enable_if<has_member_print<Last>::value, void>::type                                \
-    __print_members(std::ostream & out, const std::string & indent,                                   \
-                    const std::string & lname, const Last & last) const                               \
-    {                                                                                                 \
-        last.__print(out, lname, indent);                                                             \
-    }                                                                                                 \
-                                                                                                      \
-    template<typename Last>                                                                           \
-    typename std::enable_if<!has_member_print<Last>::value, void>::type                               \
-    __print_members(std::ostream & out, const std::string & indent,                                   \
-                    const std::string & lname, const Last & last) const                               \
-    {                                                                                                 \
-        out << indent << lname << ": " << last << std::endl;                                          \
-    }                                                                                                 \
-                                                                                                      \
-    template<typename First, typename... Others>                                                      \
-    typename std::enable_if<has_member_print<First>::value, void>::type                               \
-    __print_members(std::ostream & out, const std::string & indent,                                   \
-    const std::string & fname, const First & first, const Others &... others) const                   \
-    {                                                                                                 \
-        first.__print(out, fname, indent);                                                            \
-        __print_members(out, indent, others...);                                                      \
-    }                                                                                                 \
-    template<typename First, typename... Others>                                                      \
-    typename std::enable_if<!has_member_print<First>::value, void>::type                              \
-    __print_members(std::ostream & out, const std::string & indent,                                   \
-    const std::string & fname, const First & first, const Others &... others) const                   \
-    {                                                                                                 \
-        out << indent << fname << ": " << first << std::endl;                                         \
-        __print_members(out, indent, others...);                                                      \
+#define REGISTER_STRUCT(...)                                                                                \
+    void __print(std::ostream & __out, const std::string & __name, const std::string & __indent = "") const \
+    {                                                                                                       \
+        __out << __indent << __name << ":\n";                                                               \
+        __print_members(__out, __indent + "  ", __VA_ARGS__);                                               \
+    }                                                                                                       \
+                                                                                                            \
+    template<typename Last>                                                                                 \
+    typename std::enable_if<has_member_print<Last>::value, void>::type                                      \
+    __print_members(std::ostream & __out, const std::string & __indent,                                     \
+                    const std::string & __lname, const Last & __last) const                                 \
+    {                                                                                                       \
+        __last.__print(__out, __lname, __indent);                                                           \
+    }                                                                                                       \
+                                                                                                            \
+    template<typename Last>                                                                                 \
+    typename std::enable_if<!has_member_print<Last>::value, void>::type                                     \
+    __print_members(std::ostream & __out, const std::string & __indent,                                     \
+                    const std::string & __lname, const Last & __last) const                                 \
+    {                                                                                                       \
+        __out << __indent << __lname << ": " << __last << std::endl;                                        \
+    }                                                                                                       \
+                                                                                                            \
+    template<typename First, typename... Others>                                                            \
+    typename std::enable_if<has_member_print<First>::value, void>::type                                     \
+    __print_members(std::ostream & __out, const std::string & __indent,                                     \
+    const std::string & __fname, const First & __first, const Others &... others) const                     \
+    {                                                                                                       \
+        __first.__print(__out, __fname, __indent);                                                          \
+        __print_members(__out, __indent, others...);                                                        \
+    }                                                                                                       \
+                                                                                                            \
+    template<typename First, typename... Others>                                                            \
+    typename std::enable_if<!has_member_print<First>::value, void>::type                                    \
+    __print_members(std::ostream & __out, const std::string & __indent,                                     \
+    const std::string & __fname, const First & __first, const Others &... others) const                     \
+    {                                                                                                       \
+        __out << __indent << __fname << ": " << __first << std::endl;                                       \
+        __print_members(__out, __indent, others...);                                                        \
     }
 
 /// @brief 打印注册后的结构体对象数据，支持任意数据流对象
@@ -70,32 +71,32 @@ struct has_member_print<T, decltype(void(std::declval<T>().__print(std::cout, ""
 /// @brief 注册枚举时需要调用，传入枚举类型后依次传入注册后的对象名。需要编译期可见，一般放在头文件中
 /// @param ENUM_TYPE 枚举类型
 /// @param ... 枚举中所有的对象
-#define REGISTER_ENUM(ENUM_TYPE, ...)                                                            \
-namespace __Enum_##ENUM_TYPE                                                                     \
-{                                                                                                \
-    static std::unordered_map<ENUM_TYPE, std::string> __map;                                     \
-                                                                                                 \
-    template<typename Last>                                                                      \
-    void __add_members(const std::string & lname, const Last & last)                             \
-    {                                                                                            \
-        __map.insert({ last, lname });                                                           \
-    }                                                                                            \
-                                                                                                 \
-    template<typename First, typename... Others>                                                 \
-    void __add_members(const std::string & fname, const First & first, const Others &... others) \
-    {                                                                                            \
-        __map.insert({ first, fname });                                                          \
-        __add_members(others...);                                                                \
-    }                                                                                            \
-                                                                                                 \
-    static int __dummy_##ENUM_TYPE = []() -> int { __add_members(__VA_ARGS__); return 0; }();    \
-}                                                                                                \
-std::ostream & operator<<(std::ostream & out, const ENUM_TYPE & e);
+#define REGISTER_ENUM(ENUM_TYPE, ...)                                                                \
+namespace __Enum_##ENUM_TYPE                                                                         \
+{                                                                                                    \
+    static std::unordered_map<ENUM_TYPE, std::string> __map;                                         \
+                                                                                                     \
+    template<typename Last>                                                                          \
+    void __add_members(const std::string & __lname, const Last & __last)                             \
+    {                                                                                                \
+        __map.insert({ __last, __lname });                                                           \
+    }                                                                                                \
+                                                                                                     \
+    template<typename First, typename... Others>                                                     \
+    void __add_members(const std::string & __fname, const First & __first, const Others &... others) \
+    {                                                                                                \
+        __map.insert({ __first, __fname });                                                          \
+        __add_members(others...);                                                                    \
+    }                                                                                                \
+                                                                                                     \
+    static int __dummy_##ENUM_TYPE = []() -> int { __add_members(__VA_ARGS__); return 0; }();        \
+}                                                                                                    \
+std::ostream & operator<<(std::ostream & __out, const ENUM_TYPE & e);
 
 /// @brief 注册枚举后需要调用，以便实现 operator<< 重载的效果。
 /// @param ENUM_TYPE 枚举类型
-#define REGISTER_ENUM_STREAM(ENUM_TYPE)                                                          \
-std::ostream & operator<<(std::ostream & out, const ENUM_TYPE & e)                               \
-{                                                                                                \
-   return out << __Enum_##ENUM_TYPE::__map[e];                                                   \
+#define REGISTER_ENUM_STREAM(ENUM_TYPE)                                 \
+std::ostream & operator<<(std::ostream & __out, const ENUM_TYPE & e)    \
+{                                                                       \
+   return __out << __Enum_##ENUM_TYPE::__map[e];                        \
 }

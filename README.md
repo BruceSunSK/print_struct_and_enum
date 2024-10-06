@@ -73,11 +73,11 @@ PRINT_STRUCT(std::cout, p);
 ``` c++
 >rap  
 >p:  
->  name: p  
+>  name: Bob  
 >  age: 18  
 >  height: 1.8  
 >  school:  
->    name: school  
+>    name: BIT  
 >    position: 42  
 >  favorite:  
 >    color: Color::RED  
@@ -93,11 +93,11 @@ PRINT_STRUCT(std::cout, p);
 使用stringstream流效果如下：
 ``` c++
 >p:
->  name: p
+>  name: Bob
 >  age: 18
 >  height: 1.8
 >  school:
->    name: school
+>    name: BIT
 >    position: 42
 >  favorite:
 >    color: Color::RED
