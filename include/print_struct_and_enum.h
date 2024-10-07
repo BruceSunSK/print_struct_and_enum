@@ -68,14 +68,23 @@ struct has_member_print<T, decltype(void(std::declval<T>().__print(std::cout, ""
 /// @param obj 待打印的注册后的结构体对象
 #define PRINT_STRUCT(ostream_obj, obj)  obj.__print(ostream_obj, #obj)
 
-/// @brief 注册枚举时需要调用，传入枚举类型后依次传入注册后的对象名。需要编译期可见，一般放在头文件中
+/// @brief 注册枚举时需要调用，传入枚举类型。需要编译期可见，一般放在头文件中
 /// @param ENUM_TYPE 枚举类型
-/// @param ... 枚举中所有的对象
-#define REGISTER_ENUM(ENUM_TYPE, ...)                                                                \
+#define REGISTER_ENUM(ENUM_TYPE)                                                                     \
 namespace __Enum_##ENUM_TYPE                                                                         \
 {                                                                                                    \
-    static std::unordered_map<ENUM_TYPE, std::string> __map;                                         \
-                                                                                                     \
+    extern std::unordered_map<ENUM_TYPE, std::string> __map;                                         \
+    extern int __dummy_##ENUM_TYPE;                                                                  \
+}                                                                                                    \
+std::ostream & operator<<(std::ostream & __out, const ENUM_TYPE & e);
+
+/// @brief 注册枚举后需要调用，传入枚举类型后依次传入注册后的对象名，以便实现 operator<< 重载打印字符串的效果。
+/// @param ENUM_TYPE 枚举类型
+/// @param ... 枚举中所有的对象
+#define REGISTER_ENUM_BODY(ENUM_TYPE, ...)                                                           \
+namespace __Enum_##ENUM_TYPE                                                                         \
+{                                                                                                    \
+    std::unordered_map<ENUM_TYPE, std::string> __map;                                                \
     template<typename Last>                                                                          \
     void __add_members(const std::string & __lname, const Last & __last)                             \
     {                                                                                                \
@@ -89,14 +98,9 @@ namespace __Enum_##ENUM_TYPE                                                    
         __add_members(others...);                                                                    \
     }                                                                                                \
                                                                                                      \
-    static int __dummy_##ENUM_TYPE = []() -> int { __add_members(__VA_ARGS__); return 0; }();        \
+    int __dummy_##ENUM_TYPE = []() -> int { __add_members(__VA_ARGS__); return 0; }();               \
 }                                                                                                    \
-std::ostream & operator<<(std::ostream & __out, const ENUM_TYPE & e);
-
-/// @brief 注册枚举后需要调用，以便实现 operator<< 重载的效果。
-/// @param ENUM_TYPE 枚举类型
-#define REGISTER_ENUM_STREAM(ENUM_TYPE)                                 \
-std::ostream & operator<<(std::ostream & __out, const ENUM_TYPE & e)    \
-{                                                                       \
-   return __out << __Enum_##ENUM_TYPE::__map[e];                        \
+std::ostream & operator<<(std::ostream & __out, const ENUM_TYPE & e)                                 \
+{                                                                                                    \
+   return __out << __Enum_##ENUM_TYPE::__map[e];                                                     \
 }

@@ -7,11 +7,11 @@ enum class Color
     GREEN,
     BLUE
 };
-REGISTER_ENUM(Color,
-              REGISTER_MEMBER(Color::RED),
-              REGISTER_MEMBER(Color::GREEN),
-              REGISTER_MEMBER(Color::BLUE));
-REGISTER_ENUM_STREAM(Color);
+REGISTER_ENUM(Color);
+REGISTER_ENUM_BODY(Color,
+                   REGISTER_MEMBER(Color::RED),
+                   REGISTER_MEMBER(Color::GREEN),
+                   REGISTER_MEMBER(Color::BLUE));
 
 
 struct School
@@ -52,12 +52,13 @@ int main(int argc, char const * argv[])
     // std::cout << "color c is: " << c << std::endl;
 
     Person p = { "Bob", 18, 1.8, {"BIT", 42}, {Color::RED, "basketball"} };
-    PRINT_STRUCT(std::cout, p);
-
-    // std::stringstream ss;
-    // PRINT_STRUCT(ss, p);
-    // ss << "here is stringstream!" << std::endl;
-    // std::cout << ss.str();
+    // PRINT_STRUCT(std::cout, p);
+    
+    std::cin >> p.name;
+    std::stringstream ss;
+    PRINT_STRUCT(ss, p);
+    ss << "here is stringstream!" << std::endl;
+    std::cout << ss.str();
 
     return 0;
 }
