@@ -48,19 +48,19 @@ struct has_member_print<T, decltype(void(std::declval<T>().__print(std::cout, ""
     template<typename First, typename... Others>                                                            \
     typename std::enable_if<has_member_print<First>::value, void>::type                                     \
     __print_members(std::ostream & __out, const std::string & __indent,                                     \
-    const std::string & __fname, const First & __first, const Others &... others) const                     \
+    const std::string & __fname, const First & __first, const Others &... __others) const                   \
     {                                                                                                       \
         __first.__print(__out, __fname, __indent);                                                          \
-        __print_members(__out, __indent, others...);                                                        \
+        __print_members(__out, __indent, __others...);                                                      \
     }                                                                                                       \
                                                                                                             \
     template<typename First, typename... Others>                                                            \
     typename std::enable_if<!has_member_print<First>::value, void>::type                                    \
     __print_members(std::ostream & __out, const std::string & __indent,                                     \
-    const std::string & __fname, const First & __first, const Others &... others) const                     \
+    const std::string & __fname, const First & __first, const Others &... __others) const                   \
     {                                                                                                       \
         __out << __indent << __fname << ": " << __first << std::endl;                                       \
-        __print_members(__out, __indent, others...);                                                        \
+        __print_members(__out, __indent, __others...);                                                      \
     }
 
 /// @brief 打印注册后的结构体对象数据，支持任意数据流对象
@@ -70,37 +70,37 @@ struct has_member_print<T, decltype(void(std::declval<T>().__print(std::cout, ""
 
 /// @brief 注册枚举时需要调用，传入枚举类型。需要编译期可见，一般放在头文件中
 /// @param ENUM_TYPE 枚举类型
-#define REGISTER_ENUM(ENUM_TYPE)                                                                     \
-namespace __Enum_##ENUM_TYPE                                                                         \
-{                                                                                                    \
-    extern std::unordered_map<ENUM_TYPE, std::string> __map;                                         \
-    extern int __dummy_##ENUM_TYPE;                                                                  \
-}                                                                                                    \
+#define REGISTER_ENUM(ENUM_TYPE)                                                                            \
+namespace __Enum_##ENUM_TYPE                                                                                \
+{                                                                                                           \
+    extern std::unordered_map<ENUM_TYPE, std::string> __map;                                                \
+    extern int __dummy_##ENUM_TYPE;                                                                         \
+}                                                                                                           \
 std::ostream & operator<<(std::ostream & __out, const ENUM_TYPE & e);
 
 /// @brief 注册枚举后需要调用，传入枚举类型后依次传入注册后的对象名，以便实现 operator<< 重载打印字符串的效果。
 /// @param ENUM_TYPE 枚举类型
 /// @param ... 枚举中所有的对象
-#define REGISTER_ENUM_BODY(ENUM_TYPE, ...)                                                           \
-namespace __Enum_##ENUM_TYPE                                                                         \
-{                                                                                                    \
-    std::unordered_map<ENUM_TYPE, std::string> __map;                                                \
-    template<typename Last>                                                                          \
-    void __add_members(const std::string & __lname, const Last & __last)                             \
-    {                                                                                                \
-        __map.insert({ __last, __lname });                                                           \
-    }                                                                                                \
-                                                                                                     \
-    template<typename First, typename... Others>                                                     \
-    void __add_members(const std::string & __fname, const First & __first, const Others &... others) \
-    {                                                                                                \
-        __map.insert({ __first, __fname });                                                          \
-        __add_members(others...);                                                                    \
-    }                                                                                                \
-                                                                                                     \
-    int __dummy_##ENUM_TYPE = []() -> int { __add_members(__VA_ARGS__); return 0; }();               \
-}                                                                                                    \
-std::ostream & operator<<(std::ostream & __out, const ENUM_TYPE & e)                                 \
-{                                                                                                    \
-   return __out << __Enum_##ENUM_TYPE::__map[e];                                                     \
+#define REGISTER_ENUM_BODY(ENUM_TYPE, ...)                                                                  \
+namespace __Enum_##ENUM_TYPE                                                                                \
+{                                                                                                           \
+    std::unordered_map<ENUM_TYPE, std::string> __map;                                                       \
+    template<typename Last>                                                                                 \
+    void __add_members(const std::string & __lname, const Last & __last)                                    \
+    {                                                                                                       \
+        __map.insert({ __last, __lname });                                                                  \
+    }                                                                                                       \
+                                                                                                            \
+    template<typename First, typename... Others>                                                            \
+    void __add_members(const std::string & __fname, const First & __first, const Others &... __others)      \
+    {                                                                                                       \
+        __map.insert({ __first, __fname });                                                                 \
+        __add_members(__others...);                                                                         \
+    }                                                                                                       \
+                                                                                                            \
+    int __dummy_##ENUM_TYPE = []() -> int { __add_members(__VA_ARGS__); return 0; }();                      \
+}                                                                                                           \
+std::ostream & operator<<(std::ostream & __out, const ENUM_TYPE & e)                                        \
+{                                                                                                           \
+   return __out << __Enum_##ENUM_TYPE::__map[e];                                                            \
 }
